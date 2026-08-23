@@ -177,7 +177,7 @@ def login():
         session["user"] = email
         session["user_id"] = id
         session["module"] = "brainstorming"
-        
+
         if email == "admin":
             session["role"] = "admin"
             return jsonify({"status": "admin"}), 200
@@ -535,7 +535,7 @@ def chat():
             model="openai.gpt-5.6-luna",
             instructions=f"Write a short welcome message relevant to the prompt. Prompt: {BRAINSTORMING_PROMPT if module == 'brainstorming' else EVALUATION_PROMPT}",
             input="complete instructions",
-            max_output_tokens=126,
+            max_output_tokens=1024,
             store=False,
             reasoning={"effort": "low"}
         )
@@ -555,7 +555,7 @@ def chat():
                 """,
         input=f"{get_history()} + user message: {user_message}",
         tools=[{"type": "web_search", "external_web_access": False}],
-        max_output_tokens=2048,
+        max_output_tokens=8192,
         store=False,
         reasoning={"effort": "low"}
     )
