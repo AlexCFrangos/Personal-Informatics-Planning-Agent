@@ -125,27 +125,6 @@ print("-----tables-----")
 for (table,) in cursor.fetchall():
     print(table)
 
-def get_db():
-    return pymysql.connect(
-        host=os.environ.get("RDS_HOST"),
-        user=os.environ.get("RDS_USER"),
-        password=os.environ.get("RDS_PASSWORD"),
-        database="teem_planningagent",
-        port=3306,
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=False
-    )
-
-connection = get_db()
-try:
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "INSERT IGNORE INTO user_table (email, password, name, class_section) VALUES (%s, %s, %s, %s)", ("admin", "123", "admin", "none")
-        )
-        connection.commit()
-finally:
-    connection.close()
-
 conn.commit()
 cursor.close()
 conn.close()

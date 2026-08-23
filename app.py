@@ -158,20 +158,13 @@ def login():
     if password == "":
         return jsonify({"status": "no password entered"}), 400
 
-    if email == "admin":
-        session["user"] = "admin"
-        session["role"] = "admin"
-        session["user_id"] = 1
-        session["module"] = "brainstorming"
-        return jsonify({"status": "admin"}), 200
-
     conn = get_db()
 
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT user_id, email, password FROM user_table WHERE email = %s", (email,))
             row = cursor.fetchone()
-            if row is None and email != "admin":
+            if row is None:
                 return jsonify({"status": "incorrect email"}), 401
             id = row["user_id"]
             database_password = row["password"]
@@ -182,10 +175,16 @@ def login():
         if hashed_password != database_password:
             return jsonify({"status": "incorrect password"}), 401
         session["user"] = email
-        session["role"] = "user"
         session["user_id"] = id
         session["module"] = "brainstorming"
-        return jsonify({"status": "success"}), 200
+        
+        if email == "admin":
+            session["role"] = "admin"
+            return jsonify({"status": "admin"}), 200
+        else:
+            session["role"] = "user"
+            return jsonify({"status": "success"}), 200
+    
     return jsonify({"status": "invalid credentials"}), 401
 
 #function used to send password to entered email
