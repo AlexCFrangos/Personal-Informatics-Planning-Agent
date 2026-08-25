@@ -728,12 +728,6 @@
         {
             message = [];
             variable.forEach((variable, index) => {
-                if(variable == "") variable = "N/A";
-                if(unit[index] == "") unit[index] = "N/A";
-                if(collection_method[index] == "") collection_method[index] = "N/A";
-                if(goal[index] == "") goal[index] = "N/A";
-                if(variable_type[index] == "") variable_type[index] = "N/A";
-
                 message.push(
                 `### Variable ${index+1}\n\n` +
                 `**Variable:** ${variable}\n\n` +
@@ -744,11 +738,6 @@
                 );
             });
             hypothesis.forEach((hypothesis, index) => {
-                if(hypothesis == "") hypothesis = "N/A";
-                if(evidence[index] == "") evidence[index] = "N/A";
-                if(study_type[index] == "") study_type[index] = "N/A";
-                if(evidence_strength[index] == "") evidence_strength[index] = "N/A";
-
                 message.push(
                 `### Hypothesis ${index+1}, ${data_link_1[index]} & ${data_link_2[index]}\n\n`+
                 `**Hypothesis:** ${hypothesis}\n\n` +

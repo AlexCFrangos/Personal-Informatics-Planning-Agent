@@ -417,17 +417,17 @@ def download_data():
     username = session.get("user")
     timestamp = datetime.datetime.now().strftime("%m/%d/%y %H:%M:%S")  # noqa: DTZ005
 
-    hypothesis = data.get("hypothesis", "N/A")
-    evidence = data.get("evidence", "N/A")
-    study_type = data.get("study_type", "N/A")
-    evidence_strength = data.get("evidence_strength", "N/A")
-    data_link_1 = data.get("data_link_1", "N/A")
-    data_link_2 = data.get("data_link_2", "N/A")
-    variable = data.get("variable", "N/A")
-    variable_unit = data.get("variable_unit", "N/A")
-    collection_method = data.get("collection_method", "N/A")
-    goal = data.get("goal", "N/A")
-    variable_type = data.get("variable_type", "N/A")
+    hypothesis = data.get("hypothesis", "")
+    evidence = data.get("evidence", "")
+    study_type = data.get("study_type", "")
+    evidence_strength = data.get("evidence_strength", "")
+    data_link_1 = data.get("data_link_1", "")
+    data_link_2 = data.get("data_link_2", "")
+    variable = data.get("variable", "")
+    variable_unit = data.get("variable_unit", "")
+    collection_method = data.get("collection_method", "")
+    goal = data.get("goal", "")
+    variable_type = data.get("variable_type", "")
 
     conn = get_db()
     with conn.cursor() as cursor:
@@ -549,11 +549,11 @@ def extract_check_in():
                     """,
                     (submission_id,
                      user_id,
-                     v or "N/A",
-                     unit[i] if i < len(unit) else "N/A",
-                     collection_method[i] if i < len(collection_method) else "N/A",
-                     goal[i] if i < len(goal) else "N/A",
-                     variable_type[i] if i < len(variable_type) else "N/A"
+                     v or "",
+                     unit[i] if i < len(unit) else "",
+                     collection_method[i] if i < len(collection_method) else "",
+                     goal[i] if i < len(goal) else "",
+                     variable_type[i] if i < len(variable_type) else ""
                     )
                 )
 
@@ -566,12 +566,12 @@ def extract_check_in():
                     """,
                     (submission_id,
                      user_id,
-                     h or "N/A",
-                     evidence[i] if i < len(evidence) else "N/A",
-                     study_type[i] if i < len(study_type) else "N/A",
+                     h or "",
+                     evidence[i] if i < len(evidence) else "",
+                     study_type[i] if i < len(study_type) else "",
                      strength[i] if i < len(strength) else None,
-                     link_1[i] if i < len(link_1) else "N/A",
-                     link_2[i] if i < len(link_2) else "N/A"
+                     link_1[i] if i < len(link_1) else "",
+                     link_2[i] if i < len(link_2) else ""
                     )
                 )
             conn.commit()
