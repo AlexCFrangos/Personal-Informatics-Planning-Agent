@@ -24,21 +24,42 @@
 
         <div id="helpText" style="display: none; flex-direction: column; align-items: flex-end;">
             <div style="margin-bottom: 10px; width: 20vw; border-radius: 16px; border: 1px solid rgb(200,200,200); background: #212121; padding: 10px;">
-                <h4>Messaging:</h4>
-                <p>By default, the Agent will focus on brainstorming</p>
-                <p>Submitting data from the table(press the button with an arrow on the left) will switch the Agent to evaluation</p>
-                <p>Don't abuse the chatting functionality - all messages will be read</p>
-                <h4>Planning table:</h4>
-                <ol>
-                    <li>Enter a variable you would like to test</li>
-                    <li>Enter the appropriate information for that variable</li>
-                    <li>Add/remove rows for the amount of variables you wish to test</li>
-                    <li>Repeat the same with hypotheses</li>
-                </ol>
-                <p>Submitting data causes all entered information to be entered into the chat, while retaining the data in the table</p>
-                <p>Downloading a summary (when data is entered into the table) starts a download of a text file with the data and the chat history</p>
-                <p>Clearing history results in ALL data to be cleared - chat history and the data table</p>
-                <p>Contact the developer (bug reporting/last resort): afrango1@umbc.edu</p>
+                <p>This AI agent is designed to support you to build a Personal Informatics Plan.</p>
+
+                <b>The two use cases:</b>
+                <ul>
+                    <li>If you have little idea or only a vague idea of your plan, you may use brainstorming mode (default) in which AI will guide you to build a plan step by step;</li>
+                    <li>If you already have a draft plan (don’t have to be complete or perfect), you may go straight to the feedback mode by pressing the button with an arrow on the left, enter your plan into the table and submit your plan for feedback and improve the plan with the feedback through chatting with AI.</li>
+                </ul>
+
+                <b>Planning table - Data Table (Top)</b>
+                <ul>
+                    <li>Variable: a specific measure  you would like to track, e.g. sleep duration</li>
+                    <li>Unit: the unit of measurement, e.g. hours, or None if in scale like 1 to 5 </li>
+                    <li>Collection Method: how do you plan to collect the data, for example, manual, fitbit, etc. </li>
+                    <li>Goal: a specific target quantity, e.g. 8 or a directional goal, e.g. improve </li>
+                    <li>Type: data type that the variable belongs to, see list of data type (https://tinyurl.com/pipaDatatype) </li>
+                </ul>
+
+                <b>Planning table - Hypothesis Table (Bottom)</b>
+                <ul>
+                    <li>Hypothesis: a statement about relationship between variables, e.g. good sleep likely to improve focus</li>
+                    <li>Evidence: link to a source that supports the hypothesis </li>
+                    <li>Type of Study and evidence strength: see details (https://tinyurl.com/pipaEvidence) </li>
+                    <li>Link to data 1 and data 2: select the relevant variables</li>
+                </ul>
+
+                <p>Submit Plan for Feedback: Submit the plan table for AI to evaluate and give feedback</p>
+                <p>Download Plan: Download the plan as a text file along with the chat history, student may submit this file to blackboard</p>
+                <p>Clearing history: Causes chat history to be clearing, and any work in the planning table (if you have not yet submitted it)</p>
+
+                <b>Bug/issue reporting:</b>
+                <ul>
+                    <li>Email: afrango1@umbc.edu</li>
+                    <li>Discord: cpt.cheese</li>
+                </ul>
+
+                <p><b>Reminder:</b> please remain focused in the chat, all chat history will be logged and available for instructors to review.</p>
             </div>
             <button onclick="help('close')">Close</button>
         </div>
@@ -176,12 +197,12 @@
 <div id="extractButtons" style="display: none; margin-left: 60px; margin-top: 20px; width: 100vw;">
     <div style="display: grid; grid-template-columns: 200px 200px; column-gap: 50px;">
         <button onclick="extractCheckIn('submit')" id="extractButton" type="submit" style="width: 200px; height: 50px;">
-            <span class="text-default">Submit & Save data</span>
-            <span class="text-hover">Submits the data to the chat and saves it for later</span>
+            <span class="text-default">Submit & save plan</span>
+            <span class="text-hover">Submits plan for AI feedback</span>
         </button>
         <button onclick="extractCheckIn('download')" id="downloadButton" type="submit" style="width: 200px; height: 50px;">
-            <span class="text-default">Download summary</span>
-            <span class="text-hover">Downloads a text file with table and chat history</span>
+            <span class="text-default">Download plan</span>
+            <span class="text-hover">Download plan and chat history as a text file</span>
         </button>
     </div>
 </div>
@@ -192,7 +213,7 @@
 
 <div id="logoutButton" style="margin-top: 22px; margin-bottom: 30px; width: 98vw; display: flex; flex-direction: row; justify-content: flex-end; column-gap: 20px;">
     <button id="clearHistoryButton" onclick="clearHistory()">Clear history</button>
-    <button id="confirmClearHistoryButton" onclick="confirmClearHistory()" style="width: 350px; display: none;">Are you sure?</button>
+    <button id="confirmClearHistoryButton" onclick="confirmClearHistory()" style="width: 350px; display: none;">Are you sure? This will clear the planning table and chat history.</button>
 
     <form action="/logout" method="POST">
         <button type="submit" class="button">Logout</button>
@@ -320,7 +341,11 @@
                     enterMessage();
                 }
             });
-            
+
+            if (sessionStorage.getItem("loadTable") == "true" || sessionStorage.getItem("loadTable") == null) loadTables();
+        };
+
+        async function loadTables() {
             const get_table = await fetch("/get_data", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -350,7 +375,7 @@
             strengthInputList.forEach((el, i) => el.value = table_data.strengths[i] || 1);
             dataLink1InputList.forEach((el, i) => el.value = table_data.links1[i] || "");
             dataLink2InputList.forEach((el, i) => el.value = table_data.links2[i] || "");
-        };
+        }
 
         function updateHistory(role, content) {
             const log = document.getElementById("history_log");
@@ -772,6 +797,8 @@
             const data = await response.json();
             
             updateHistory("assistant", data.reply);
+            
+            sessionStorage.setItem("loadTable", "true");
 
             return;
         }
@@ -816,6 +843,8 @@
                 headers: {"Content-Type": "application/json"},
             });
             window.location.reload();
+
+            sessionStorage.setItem("loadTable", "false");
         }
         
         function help(action) {
