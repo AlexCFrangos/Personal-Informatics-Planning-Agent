@@ -26,11 +26,10 @@ cursor.execute("SHOW TABLES")
 print("-----tables-----")
 for (table,) in cursor.fetchall():
     print(table)
-cursor.execute("DROP TABLE hypothesis_variable_table")
 cursor.execute("DROP TABLE hypothesis_table")
 cursor.execute("DROP TABLE variable_table")
 cursor.execute("DROP TABLE chat_table")
-cursor.execute("DROP TABLE user_table")
+#cursor.execute("DROP TABLE user_table")
 
 #user data table
 cursor.execute("""
@@ -49,6 +48,7 @@ cursor.execute("""
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS variable_table (
         variable_id INT AUTO_INCREMENT PRIMARY KEY,
+        submission_id INT,
         user_id INT,
 
         variable TEXT,
@@ -66,12 +66,15 @@ cursor.execute("""
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS hypothesis_table (
         hypothesis_id INT AUTO_INCREMENT PRIMARY KEY,
+        submission_id INT,
         user_id INT,
 
         hypothesis TEXT,
         evidence TEXT,
         study_type TEXT,
         evidence_strength INT,
+        link_1 TEXT,
+        link_2 TEXT,
 
         FOREIGN KEY (user_id)
             REFERENCES user_table(user_id)
@@ -79,22 +82,6 @@ cursor.execute("""
     );
 """)
 
-#junction table
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS hypothesis_variable_table (
-        hypothesis_id INT NOT NULL,
-        variable_id INT NOT NULL,
-
-        PRIMARY KEY (hypothesis_id, variable_id),
-
-        FOREIGN KEY (hypothesis_id)
-            REFERENCES hypothesis_table(hypothesis_id)
-            ON DELETE CASCADE,
-        FOREIGN KEY (variable_id)
-            REFERENCES variable_table(variable_id)
-            ON DELETE CASCADE
-    );
-""")
 #transactional table for normal chatting
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS chat_table (

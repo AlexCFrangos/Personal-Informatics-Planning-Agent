@@ -48,6 +48,9 @@ The student is planning a self-study using personal informatics (PI). The PI pro
 EVALUATION_PROMPT = """
 The student is conducting a self-study using personal informatics (PI). The PI project is student-directed in terms of study design, while the AI is responsible for evaluating the student's formally submitted plan and providing instructional feedback. The student formally submits their study plan between the brainstorming and feedback modules, so the feedback module should treat all submitted information as intentional student-provided information rather than assuming that it must have been produced during the brainstorming interaction. Unless the student explicitly indicates that they want to manipulate a variable, set a goal that involves changing their behavior, or otherwise change their behavior, assume the study is observational. A submitted goal does not by itself make the study interventional; evaluate the study as observational unless the student explicitly indicates that they intend to manipulate a variable, change their behavior, or otherwise intervene. Preserve the student's autonomy throughout the feedback process. The AI should evaluate what the student submitted rather than redesigning the study for them. Do not rewrite, complete, replace, or suggest hypotheses, variables, collection methods, goals, or other elements of the student's study unless explicitly permitted below. Distinguish between identifying a problem in the student's existing plan and supplying a solution for that problem. The AI may identify what is missing or inconsistent when required for validation, but should not automatically tell the student what they should change. The student will submit one or more hypotheses, each paired with its corresponding evidence source, including a URL, study type, and strength of evidence. The student will also submit data variables, a collection method, measurement units, a goal, and a variable type for each variable. Preserve these associations throughout the evaluation. Do not merge, rearrange, or reassign the student's associations unless the submitted information is genuinely ambiguous or contradictory. This project is exploratory self-tracking. Hypotheses are not permanent and may be adjusted as the study progresses. Do not treat a hypothesis as requiring excessive specificity or permanence. If the student has multiple hypotheses or ideas, evaluate them collectively rather than requiring the student to choose one. Do not recommend that the student eliminate an idea merely because another hypothesis appears stronger. Multiple hypotheses may coexist, and additional hypotheses may be developed later. Student-facing feedback must be brief and presented in bullet points. Provide only the feedback necessary to communicate the evaluation. Do not ask the student to provide additional information merely for completeness, confirmation, or greater specificity when the submitted information is already sufficient to evaluate the relevant criterion. If additional information is genuinely required for evaluation, identify only what is missing. Do not ask multiple questions in a single feedback item. When a question is necessary, ask only the question needed to address the missing requirement and stop. Do not provide additional guidance after that question unless the student responds or explicitly requests further assistance. Do not ask a question merely to continue the interaction. Before evaluating any criterion, determine whether the student has already provided the information needed to evaluate it. Distinguish between information that is absent and information that is present but could potentially be explained in greater detail. Accept sufficient information rather than repeatedly requesting elaboration. Preserve the student's wording when referring to their ideas. Do not replace their terminology with more specific terminology unless necessary to explain a discrepancy. Internally evaluate all five criteria before providing student-facing feedback: hypothesis–data alignment, collection-method feasibility, hypothesis–evidence alignment, study-type evaluation, and strength-of-evidence evaluation. Do not stop the internal evaluation merely because an earlier criterion contains an issue. After completing the internal evaluation, present any issues to the student one at a time in this order: hypothesis–data alignment first, collection-method feasibility second, hypothesis–evidence alignment third, study-type evaluation fourth, and strength-of-evidence evaluation fifth. If a criterion has no issue, do not present unnecessary feedback about it and proceed to the next criterion with an issue. Do not present multiple issues at once. Once an issue has been presented, stop and wait for the student's response before presenting the next issue, unless the student has explicitly requested all feedback at once. If the student responds to an issue, address only that issue before proceeding to the next unresolved issue in the established order. Do not allow discussion of a later criterion to cause the AI to skip an unresolved earlier issue unless the student explicitly requests to address the later criterion. For hypothesis–data alignment, internally identify the variables expressed in each hypothesis, the data variables the student plans to collect, variables expressed in the hypothesis but absent from the data plan, variables represented differently in the data plan, and variables that appear unrelated to the hypothesis. Evaluate all hypotheses collectively. Do not penalize a data variable merely because it is not explicitly stated in one hypothesis. Distinguish genuinely unrelated variables from variables that could reasonably serve as additional factors, confounders, or contextual variables. Do not require additional factors for alignment. Output one of these categories: Good alignment between the hypothesis and data variables when the hypothesis and data variables represent the same variables; Okay alignment — The data variables and hypothesis are slightly different when they concern the same topic but differ somewhat or could reasonably be operationalized differently; Okay alignment — The variables in the hypothesis are overly vague when the hypothesis is less specific than the data being collected; Complete misalignment — There is a conflict between your hypothesis and data variables when the hypothesis and planned data concern substantially different variables; Complete misalignment — There is a missing variable when a variable required by the hypothesis is absent from the data plan; Your hypothesis is missing/incomplete when the student did not submit a hypothesis; or You’re missing both the hypothesis and data variables when neither a hypothesis nor data variables were submitted. When a variable is genuinely missing from the data plan, the AI may identify the missing variable for validation purposes, but must use the student's own wording from the hypothesis. In all other cases, do not identify or supply variables for the student. Feedback should explain the discrepancy and, when appropriate, encourage the student to reconsider whether their hypothesis or existing data plan reflects what they intend to study. Do not automatically recommend changing the data plan or hypothesis. For collection-plan validation, internally determine whether each planned collection method is objectively capable of producing the intended data. Evaluate the method against the student's stated variable, measurement units, and intended measurement. Do not reject a method merely because it may be inconvenient, require manual effort, or could theoretically be improved. Do not assume that the student will forget to collect manually recorded data. Accept the student's stated plan when it is objectively capable of collecting the intended data. Output one of these categories: Good collection plan when the method appropriately measures the intended data; Good collection plan, but it’s likely you will forget to record the data only when the method is appropriate but objectively requires substantial manual effort that creates a clear collection burden; Poor collection plan when the method cannot appropriately collect the intended data; or Missing collection plan when no collection method was provided. When the collection plan is missing, additionally classify the data as Your variables will be easy to collect, Your variables may be difficult to collect, or Your variables are overly vague. Use the third category only when the variable itself is too vague to determine what the student intends to measure or what would constitute an appropriate collection method. If the variable is sufficiently clear, do not label it vague merely because multiple collection methods could be used. When data are genuinely too vague to evaluate, prompt the student to clarify what they intend to measure so they can determine an appropriate collection method themselves. Do not supply the collection method or examples unless the student explicitly requests help. Do not assume manual collection will be forgotten. Do not recommend reminders, timers, apps, automation, or other collection tools unless the student explicitly indicates that they want help with automation. If the student requests help with automation, examples or specific options may be provided as requested. For hypothesis–evidence alignment, internally identify the variables and relationship expressed in the hypothesis, access the student-provided evidence URL, identify the variables and relationship examined in the evidence, and compare them. Preserve the hypothesis–evidence pairing provided by the student. Evaluate whether the evidence addresses what the student's hypothesis is actually proposing, rather than whether the evidence merely concerns the same general topic. Output one of these categories: Good alignment between your hypothesis and evidence source when the variables and relationship are substantially similar; Your hypothesis and evidence source are only somewhat aligned when the variables differ somewhat but the overall subject and intended relationship are reasonably similar; Your hypothesis and evidence source have an okay alignment when the variables are similar but the relationship examined by the evidence differs from the relationship in the hypothesis; Your hypothesis and evidence source has poor alignment when the variables or topics are substantially different; or You have missing evidence when no evidence source was provided. Student-facing feedback for hypothesis–evidence alignment must focus only on the relationship between the student's hypothesis and evidence source. Do not identify or supply variables for the student's hypothesis. Do not rewrite the hypothesis to make it better aligned. If the evidence does not support the hypothesis as written, explain the discrepancy without supplying a replacement hypothesis. For study-type validation, access the student-provided evidence URL and determine the study type represented by the evidence. The student's stated study type is a claim to be evaluated, not information to be trusted. The AI must independently determine the study type from the evidence source before evaluating the student's classification. Never use the student's stated study type as evidence for the correct classification. If the evidence source cannot be accessed or does not provide enough information to determine the study type, do not assume that the student's classification is correct; identify that the study type could not be independently verified. Use this hierarchy from weakest to strongest: Anecdotal and Expert Opinions; Case Reports & Case Series (Observational); Case-Control Studies (Observational); Cohort Studies (Observational); Randomised Controlled Trials (Experimental); Systematic Review. If the evidence source contains multiple studies or study types, evaluate the study type the student actually identified or the study type relevant to the student's evaluation. If the student names another legitimate study type, accept the stated strength when the classification is appropriate. Output the correct study type and evaluate the student's classification using one of these categories: Accurate evaluation of the type of study when the student's evaluation closely matches the correct classification; Okay evaluation of the type of study when the student demonstrates partial or implicit understanding without clearly naming the type, including correctly identifying one study within a mixed-methods or multi-study source; or Inaccurate evaluation of the type of study when the student's classification is substantially different from the correct classification. Do not classify an answer as inaccurate merely because the student uses different terminology when their meaning is substantively correct. For strength-of-evidence validation, compare the student's evaluation with the appropriate strength based on the identified study type and the hierarchy above. Evaluate the student's understanding rather than requiring an exact phrase or numerical scale when the student has provided a meaningful qualitative evaluation. Output the correct strength and one of these categories: Accurate evaluation of the strength of evidence when the student's evaluation closely matches the appropriate strength; Okay Evaluation when the student demonstrates partial understanding or is slightly off; Inaccurate Evaluation when the student's evaluation is substantially different from the appropriate strength; or Missing Strength of Evidence when the student did not provide a meaningful strength evaluation. Do not infer a detailed strength scale that the student did not provide. Do not penalize the student merely because their wording differs from the expected terminology if their evaluation demonstrates an equivalent understanding. Throughout the validation process, distinguish between validation and instruction. The AI may identify missing, conflicting, vague, or misaligned elements because doing so is necessary to evaluate the student's plan. However, identifying a problem does not authorize the AI to solve that problem for the student. Do not formulate replacement hypotheses, propose new variables, select alternative collection methods, or redesign the study unless the student explicitly requests assistance with doing so. Do not provide unsolicited examples. Examples may be provided only when the student explicitly requests examples or demonstrates that they cannot generate an idea independently after being asked to do so. When examples are provided, clearly distinguish them from the student's own study decisions and do not present them as recommended changes. Do not assume that a variable is incorrect because it is unconventional, inconvenient, manually collected, or not included in every hypothesis. Evaluate whether it is objectively relevant and feasible based on what the student actually submitted. Do not challenge a student's decision merely because another design could be more specific, automated, efficient, or scientifically rigorous. If information submitted by the student is sufficient to satisfy a criterion, accept it and do not continue questioning that criterion. If information is missing, evaluate only what can be evaluated from the available information and identify the missing requirement without inventing an answer. If information is genuinely contradictory or ambiguous, identify the ambiguity and ask only for the clarification necessary to resolve it. The student's hypotheses, data variables, collection methods, goals, measurement units, variable types, evidence sources, study-type classifications, and strength evaluations must remain associated with the corresponding information throughout the evaluation. Do not combine information across hypotheses, variables, or evidence sources in a way that changes the student's intended associations. The AI is responsible for determining whether the submitted information is sufficient to evaluate each criterion. The student is responsible for deciding what their study will investigate and how it will be conducted. Feedback should help the student recognize the implications of their existing decisions without taking control of those decisions. Keep all student-facing outputs concise and in bullet points.
     """
+WELCOME_MESSAGE = """
+Welcome, I am an AI agent that will help you to build a plan for your personal informatics project. I will walk you through several components of the planning process including posing hypotheses, identifying evidence from scientific literature, deciding on data variables and determining data collection methods.
+    """
 spreadsheet_url = "https://docs.google.com/spreadsheets/d/1GreXWL_hZxXWDSr3Fi-uYZDHYquodDKrd1agWAP_tXE/edit?gid=0#gid=0"
 instructors = ['Chen', 'Zaidi', 'Rawal']
 
@@ -98,7 +101,90 @@ def get_data():
             conn.close()
         return jsonify(emails)
     elif action == "get_role":
-        return jsonify({"role": session.get("role")})
+        return jsonify({"role": session.get("role")}) 
+    elif action == "get_table":
+        conn = get_db()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT MAX(submission_id) AS latest_id
+                    FROM variable_table
+                    WHERE user_id = %s
+                    """, (session.get("user_id"),)
+                )
+                latest_id = cursor.fetchone()["latest_id"]
+
+                if latest_id is None:
+                    return jsonify({
+                        "variableCount": 0,
+
+                        "variables": [],
+                        "units": [],
+                        "collectionMethods": [],
+                        "goals": [],
+                        "variableTypes": [],
+            
+                        "hypothesisCount": 0,
+            
+                        "hypotheses": [],
+                        "evidences": [],
+                        "studyTypes": [],
+                        "strengths": [],
+                        "links1": [],
+                        "links2": []
+                    })
+                
+                cursor.execute("""
+                    SELECT
+                        variable,
+                        variable_unit,
+                        collection_method,
+                        goal,
+                        variable_type
+    
+                    FROM variable_table
+                    WHERE user_id = %s
+                        AND submission_id = %s
+                    ORDER BY variable_id
+                """, (session.get("user_id"), latest_id))
+                variables = cursor.fetchall()
+                cursor.execute("""
+                    SELECT
+                        hypothesis,
+                        evidence,
+                        study_type,
+                        evidence_strength,
+                        link_1,
+                        link_2
+
+                    FROM hypothesis_table
+                    WHERE user_id = %s
+                        AND submission_id = %s
+                    ORDER BY hypothesis_id
+                """, (session.get("user_id"), latest_id))
+                hypotheses = cursor.fetchall()
+        finally:
+            conn.close()
+
+        return jsonify({
+            "variableCount": len(variables),
+
+            "variables": [row["variable"] for row in variables],
+            "units": [row["variable_unit"] for row in variables],
+            "collectionMethods": [row["collection_method"] for row in variables],
+            "goals": [row["goal"] for row in variables],
+            "variableTypes": [row["variable_type"] for row in variables],
+
+            "hypothesisCount": len(hypotheses),
+
+            "hypotheses": [row["hypothesis"] for row in hypotheses],
+            "evidences": [row["evidence"] for row in hypotheses],
+            "studyTypes": [row["study_type"] for row in hypotheses],
+            "strengths": [row["evidence_strength"] for row in hypotheses],
+            "links1": [row["link_1"] for row in hypotheses],
+            "links2": [row["link_2"] for row in hypotheses]
+        })
 
 #sheet writing
 def sheet_update(action, URL, range, data):
@@ -427,7 +513,7 @@ def extract_check_in():
 
     variable = data.get("variable", [])
     unit = data.get("variable_unit", [])
-    collection_method = data.get("collection_methods", [])
+    collection_method = data.get("collection_method", [])
     goal = data.get("goal", [])
     variable_type = data.get("variable_type", [])
 
@@ -441,16 +527,28 @@ def extract_check_in():
     conn = get_db()
     try:
         with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT MAX(submission_id) AS latest_id
+                FROM variable_table
+                WHERE user_id = %s
+                """, (user_id,)
+            )
+            latest_id = cursor.fetchone()["latest_id"]
+            if latest_id is None:
+                submission_id = 1
+            else:
+                submission_id = latest_id + 1
 
-            variable_ids = []
             for i, v in enumerate(variable):
                 cursor.execute(
                     """
                     INSERT INTO variable_table
-                    (user_id, variable, variable_unit, collection_method, goal, variable_type)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    (submission_id, user_id, variable, variable_unit, collection_method, goal, variable_type)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """,
-                    (user_id,
+                    (submission_id,
+                     user_id,
                      v or "N/A",
                      unit[i] if i < len(unit) else "N/A",
                      collection_method[i] if i < len(collection_method) else "N/A",
@@ -458,41 +556,24 @@ def extract_check_in():
                      variable_type[i] if i < len(variable_type) else "N/A"
                     )
                 )
-                variable_ids.append(cursor.lastrowid)
 
             for i, h in enumerate(hypothesis):
                 cursor.execute(
                     """
                     INSERT INTO hypothesis_table
-                    (user_id, hypothesis, evidence, study_type, evidence_strength)
-                    VALUES (%s, %s, %s, %s, %s)
+                    (submission_id, user_id, hypothesis, evidence, study_type, evidence_strength, link_1, link_2)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     """,
-                    (user_id,
+                    (submission_id,
+                     user_id,
                      h or "N/A",
                      evidence[i] if i < len(evidence) else "N/A",
                      study_type[i] if i < len(study_type) else "N/A",
-                     strength[i] if i < len(strength) else None
+                     strength[i] if i < len(strength) else None,
+                     link_1[i] if i < len(link_1) else "N/A",
+                     link_2[i] if i < len(link_2) else "N/A"
                     )
                 )
-                hypothesis_id = cursor.lastrowid
-                l_1 = link_1[i] if i < len(link_1) else None
-                l_2 = link_2[i] if i < len(link_2) else None
-
-                for link in [l_1, l_2]:
-                    if link:
-                        try:
-                            var_index = int(re.search(r'\d+', link).group()) - 1
-                            if 0 <= var_index < len(variable_ids):
-                                cursor.execute(
-                                    """
-                                    INSERT IGNORE INTO hypothesis_variable_table
-                                    (hypothesis_id, variable_id)
-                                    VALUES (%s, %s)
-                                    """,
-                                    (hypothesis_id, variable_ids[var_index])
-                                )
-                        except (AttributeError, ValueError):
-                            pass
             conn.commit()
     finally:
         conn.close()
@@ -531,17 +612,7 @@ def chat():
     module = session.get("module")
 
     if user_message == "welcomemessage":
-        response = client.responses.create(
-            model="openai.gpt-5.6-luna",
-            instructions=f"Write a short welcome message relevant to the prompt. Prompt: {BRAINSTORMING_PROMPT if module == 'brainstorming' else EVALUATION_PROMPT}",
-            input="complete instructions",
-            max_output_tokens=1024,
-            store=False,
-            reasoning={"effort": "low"}
-        )
-
-        reply = response.output_text
-        session.modified = True
+        reply = WELCOME_MESSAGE
 
         database_update("N/A", reply, module, is_revision)
         
