@@ -211,7 +211,7 @@
 
 
 
-<div id="logoutButton" style="margin-top: 22px; margin-bottom: 30px; width: 98vw; display: flex; flex-direction: row; justify-content: flex-end; column-gap: 20px;">
+<div id="logoutButton" style="margin-top: 60px; margin-bottom: 30px; width: 98vw; display: flex; flex-direction: row; justify-content: flex-end; column-gap: 20px;">
     <button id="clearHistoryButton" onclick="clearHistory()">Clear history</button>
     <button id="confirmClearHistoryButton" onclick="confirmClearHistory()" style="width: 350px; display: none;">Are you sure? This will clear the planning table and chat history.</button>
 
@@ -455,7 +455,7 @@
             document.getElementById("userInput").style.width = "min(600px, 50vw)";
             document.getElementById("tables").style.display = "none";
 
-            document.getElementById("logoutButton").style.marginTop = "22px";
+            document.getElementById("logoutButton").style.marginTop = "60px";
             document.getElementById("extractButtons").style.display = "none";
             document.getElementById("collapseButton").style.display = "none";
             document.getElementById("expandButton").style.display = "";
@@ -585,9 +585,10 @@
                 strengthInputList.push(input4);
 
                 const input5 = document.createElement("select");
-                variableInputList.forEach(variable => {
+                variableInputList.forEach((variable, index) => {
                     const option = document.createElement("option");
-                    option.textContent = `Variable ${variableInputList.indexOf(variable) + 1}`;
+                    option.value = variable.value
+                    option.textContent = variable.value || `Variable ${index + 1}`;
                     input5.appendChild(option);
                 });
                 input5.className = "check_in_input";
@@ -598,9 +599,10 @@
 
                 const input6 = document.createElement("select");
 
-                variableInputList.forEach(variable => {
+                variableInputList.forEach((variable, index) => {
                     const option = document.createElement("option");
-                    option.textContent = `Variable ${variableInputList.indexOf(variable) + 1}`;
+                    option.value = variable.value
+                    option.textContent = variable.value || `Variable ${index + 1}`;
                     input6.appendChild(option);
                 });
 
