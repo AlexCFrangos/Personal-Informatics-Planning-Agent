@@ -815,14 +815,14 @@ def admin_update():
                         int(row["others_count"])
                     ])
 
-                sheet_update("clear", spreadsheet_url, instructor, [])
+                sheet_update("clear", spreadsheet_url, f"{instructor} - summary", [])
 
                 last_row = len(values)
 
                 sheet_update(
                     "write",
                     spreadsheet_url,
-                    f"{instructor}!A1:Z{last_row}",
+                    f"{instructor} - summary!A1:Z{last_row}",
                     values
                 )
         finally:
@@ -830,7 +830,7 @@ def admin_update():
 
         return jsonify(success=True)
 
-    if action == "get_data":
+    if action == "get_raw":
         try:
             for instructor in instructors:
                 with conn.cursor() as cursor:
@@ -884,13 +884,13 @@ def admin_update():
                 last_row = len(values)
 
                 #clear sheets
-                sheet_update("clear", spreadsheet_url, instructor, [])
+                sheet_update("clear", spreadsheet_url, f"{instructor} - raw", [])
 
                 #write transactionary data to the sheet for each instructor
                 sheet_update(
                     "write",
                     spreadsheet_url,
-                    f"{instructor}!A1:Z{last_row}",
+                    f"{instructor} - raw!A1:Z{last_row}",
                     values
                 )
         finally:
