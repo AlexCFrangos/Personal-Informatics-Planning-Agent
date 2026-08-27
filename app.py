@@ -233,6 +233,7 @@ def login():
 
     email = data.get("email", "")
     password = data.get("password", "")
+    entered_code = data.get("entered_code", "")
 
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
@@ -256,13 +257,31 @@ def login():
             database_password = row["password"]
     finally:
         conn.close()
+
+    if session.get("reset_code"):
+        if session.get("reset_code") != entered_code:
+            return jsonify({"status": "incorrect reset code"}), 401
+        conn = get_db()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE user_table SET password = %s WHERE email = %s", (hashed_password, email))
+                conn.commit()
+        finally:
+            conn.close()
+        session["user"] = email
+        session["user_id"] = id
+        session["reset_password"] = False
+        session["reset_code"] = ""
+        session["role"] = "user"
+        return jsonify({"status": "success"})
     
     if row:
         if hashed_password != database_password:
             return jsonify({"status": "incorrect password"}), 401
+        
         session["user"] = email
         session["user_id"] = id
-        session["module"] = "brainstorming"
+        session["reset_password"] = False
 
         if email == "admin":
             session["role"] = "admin"
@@ -279,9 +298,7 @@ def recover_password():
     data = request.get_json()
     email = data.get("email", "")
 
-    characters = string.ascii_letters + string.digits
-    new_password = ''.join(secrets.choice(characters) for i in range(8))
-    hashed_password = hashlib.sha256(new_password.encode()).hexdigest()
+    reset_code = ''.join(secrets.choice(string.digits) for i in range(6))
     
     conn = get_db()
 
@@ -289,16 +306,13 @@ def recover_password():
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM user_table WHERE email = %s", (email, ))
             row = cursor.fetchone()
-            if row is None and email != "admin":
+            if row is None:
                 return jsonify({"status": "failed"}), 401
-            
-            cursor.execute("UPDATE user_table SET password = %s WHERE email = %s", (hashed_password, email))
-
-            conn.commit()
     finally:
         conn.close()
         
-    send_email(email, "New password", f"Your NEW password is: {new_password}")
+    send_email(email, "Reset code", f"Your reset code is: {reset_code}")
+    session["reset_code"] = reset_code
     return jsonify({"status": "success"})
 
 #account creation page
@@ -372,7 +386,6 @@ def create_account():
     session["user_id"] = id
     session["user"] = email
     session["role"] = "user"
-    session["module"] = "brainstorming"
     if session.get("user") is None:
         return jsonify({"status": "failed to initialize user, try again later or contact support"})
     return jsonify({"status": "success"}), 200
@@ -609,6 +622,19 @@ def chat():
     data = request.get_json()
     user_message = data.get("message", "")
     is_revision = data.get("is_revision", False)
+    conn = get_db()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT user_message, reply FROM chat_table WHERE user_id = %s AND revision = %s AND hide_from_user = %s",
+                            (session.get('user_id'), True, False))
+            row = cursor.fetchone()
+            if row:
+                session["module"] = "evaluation"
+            else:
+                session["module"] = "brainstorming"
+            session.modified = True
+    finally:
+        conn.close()
     module = session.get("module")
 
     if user_message == "welcomemessage":
@@ -628,9 +654,9 @@ def chat():
         tools=[{"type": "web_search", "external_web_access": False}],
         max_output_tokens=8192,
         store=False,
-        reasoning={"effort": "low"}
+        reasoning={"effort": "medium"}
     )
-
+    print(session.get("module"))
     reply = response.output_text
 
     database_update(user_message, reply, module, is_revision)
@@ -737,44 +763,60 @@ def admin_update():
                     SELECT
                         u.email AS student_email,
 
-                        COUNT(DISTINCT CASE WHEN c.module = 'brainstorming' THEN c.transaction_id END)
+                        (SELECT COUNT(*) FROM chat_table AS c
+                            WHERE c.user_id = u.user_id AND c.module = 'brainstorming')
                             AS brainstorming_count,
-                        COUNT(DISTINCT CASE WHEN c.module = 'evaluation' THEN c.transaction_id END)
+
+                        (SELECT COUNT(*) FROM chat_table AS c
+                            WHERE c.user_id = u.user_id AND c.module = 'evaluation')
                             AS evaluation_count,
-                        COUNT(DISTINCT CASE WHEN c.revision = 1 THEN c.transaction_id END)
+                            
+                        (SELECT COUNT(*) FROM chat_table AS c
+                            WHERE c.user_id = u.user_id AND c.revision = 1)
                             AS revision_count,
-                        MAX(CASE WHEN c.module = 'evaluation' THEN CONVERT_TZ(c.timestamp, 'UTC', 'America/New_York') ELSE NULL END)
+
+                        (SELECT CONVERT_TZ(MAX(c.timestamp), 'UTC', 'America/New_York')
+                            FROM chat_table AS c
+                            WHERE c.user_id = u.user_id AND c.module = 'evaluation')
                             AS latest_revision,
 
-                        COUNT(DISTINCT v.variable_id) AS "variable_count",
-                        COUNT(DISTINCT h.hypothesis_id) AS "hypothesis_count",
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id)
+                            AS "variable_count",
 
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Sleep' THEN v.variable_id END) AS sleep_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Excercise' THEN v.variable_id END) AS excercise_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Food' THEN v.variable_id END) AS food_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Health-others' THEN v.variable_id END) AS health_others_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'SWB' THEN v.variable_id END) AS swb_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Work' THEN v.variable_id END) AS work_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Digital' THEN v.variable_id END) AS digital_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Study' THEN v.variable_id END) AS study_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Connections' THEN v.variable_id END) AS connection_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Hobby/Skills' THEN v.variable_id END) AS hobby_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Spiritual' THEN v.variable_id END) AS spiritual_count,
-                        COUNT(DISTINCT CASE WHEN v.variable_type = 'Others' THEN v.variable_id END) AS others_count
+                        (SELECT COUNT(*) FROM hypothesis_table AS h
+                            WHERE h.user_id = u.user_id)
+                            AS "hypothesis_count",
+
+                        
+
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Sleep') AS sleep_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Excercise') AS excercise_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Food') AS food_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Health-others') AS health_others_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'SWB') AS swb_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Work') AS work_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Digital') AS digital_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Study') AS study_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Connections') AS connection_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Hobby/Skills') AS hobby_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Spiritual') AS spiritual_count,
+                        (SELECT COUNT(*) FROM variable_table AS v
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Others') AS others_count
 
                         FROM user_table AS u
-                        LEFT JOIN chat_table AS c
-                            ON u.user_id = c.user_id
-
-                        LEFT JOIN variable_table AS v
-                            ON u.user_id = v.user_id
-
-                        LEFT JOIN hypothesis_table AS h
-                            ON u.user_id = h.user_id
-
                         WHERE u.class_section = %s
-
-                        GROUP BY u.user_id, u.email
                         ORDER BY u.email
                     """, (instructor,))
                     rows = cursor.fetchall()

@@ -28,8 +28,8 @@
 
                 <b>The two use cases:</b>
                 <ul>
-                    <li>If you have little idea or only a vague idea of your plan, you may use brainstorming mode (default) in which AI will guide you to build a plan step by step;</li>
-                    <li>If you already have a draft plan (don’t have to be complete or perfect), you may go straight to the feedback mode by pressing the button with an arrow on the left, enter your plan into the table and submit your plan for feedback and improve the plan with the feedback through chatting with AI.</li>
+                    <li><b>Brainstorming Mode: </b>If you have little idea or only a vague idea of your plan, you may use brainstorming mode (default) in which AI will guide you to build a plan step by step;</li>
+                    <li><b>Evaluation Mode: </b>If you already have a draft plan (don’t have to be complete or perfect), you may go straight to the evaluation mode by pressing the button with an arrow on the left, enter your plan into the table and submit your plan for feedback and improve the plan with the feedback through chatting with AI.</li>
                 </ul>
 
                 <b>Planning table - Data Table (Top)</b>
@@ -460,6 +460,10 @@
             document.getElementById("collapseButton").style.display = "none";
             document.getElementById("expandButton").style.display = "";
         }
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: "smooth"
+            });
 
         }
 
@@ -801,6 +805,11 @@
             updateHistory("assistant", data.reply);
             
             sessionStorage.setItem("loadTable", "true");
+
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: "smooth"
+            });
 
             return;
         }

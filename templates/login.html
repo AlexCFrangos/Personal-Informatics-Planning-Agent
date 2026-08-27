@@ -39,11 +39,12 @@
     <form class="login" method="POST">
         <input style="text-align: center; width: 250px; height: 50px;" class = "userInput" id = "email" type = "email" name = "email" placeholder = "email">
         <input style="text-align: center; width: 250px; height: 50px;" class = "userInput" id = "password" type = "password" name = "password" placeholder = "password">
-    <div style="display: flex; flex-direction: row; column-gap: 10px;">
-        <button type="button" onclick="login()" style="width: 130px;">Login/Already logged in</button>
-        <button id="recoverButton" type="button" onclick="recoverPassword()" style="width: 130px;">Reset password</button>
-        <button id="confirmRecoverButton" type="button" onclick="confirmRecover()" style="width: 130px; display: none;">Are you sure?</button>
-    </div>
+        <div style="display: flex; flex-direction: row; column-gap: 10px;">
+            <input style="display: none; text-align: center; width: 108px; min-height: 28px;" class = "userInput" id = "reset_code" placeholder = "6-digit code">
+            <button id="login1" type="button" onclick="login()" style="width: 130px;">Login/Already logged in</button>
+            <button id="recoverButton" type="button" onclick="recoverPassword()" style="width: 130px;">Reset password</button>
+        </div>
+        <button id="login2" type="button" onclick="login()" style="display: none; width: 270px;">Login/Already logged in</button>
         <a href="{{ url_for('account_page') }}">
             <button type="button" style="width: 270px;">Create account</button>
         </a>
@@ -57,13 +58,14 @@
         {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
+            const entered_code = document.getElementById("reset_code").value;
 
             const statusText = document.getElementById("statusText");
 
             const response = await fetch("/login", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({email: email, password: password})
+                body: JSON.stringify({email: email, password: password, entered_code: entered_code})
             });
 
             const data = await response.json();
@@ -84,16 +86,13 @@
 
             statusText.textContent = data.status;
         }
-        function recoverPassword()
-        {
-            const recoverButton = document.getElementById("recoverButton").style.display = "none";
-            const confirmButton = document.getElementById("confirmRecoverButton").style.display = "";
-        }
-        async function confirmRecover()
+        async function recoverPassword()
         {
             const email = document.getElementById("email").value;
-
             const statusText = document.getElementById("statusText");
+            const login1 = document.getElementById("login1");
+            const login2 = document.getElementById("login2");
+            const codeInput = document.getElementById("reset_code");
 
             statusText.textContent = "sending email...";
 
@@ -105,7 +104,12 @@
             
             const data = await response.json();
 
-            if(data.status == "success") statusText.textContent = "email sent! (check spam)";
+            if(data.status == "success"){
+                statusText.textContent = "email sent! (check spam), when you are ready, enter in the code, your new password and login!";
+                login1.style.display = "none";
+                login2.style.display = "";
+                codeInput.style.display = "";
+            }
             if(data.status == "failed") statusText.textContent = "failed to send email. ensure you entered the correct email."
         }
         function help(action) {
