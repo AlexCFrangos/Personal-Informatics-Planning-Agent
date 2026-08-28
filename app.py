@@ -230,6 +230,7 @@ def login_page():
 def login():
     data = request.get_json()
 
+    #generic checks for password authenticity
     email = data.get("email", "")
     password = data.get("password", "")
     entered_code = data.get("entered_code", "")
@@ -243,6 +244,8 @@ def login():
         return jsonify({"status": "no email entered"}), 400
     if password == "":
         return jsonify({"status": "no password entered"}), 400
+    if len(password) < 8:
+        return jsonify({"status": "password must be at least 8 characters long"})
 
     conn = get_db()
 
@@ -257,7 +260,8 @@ def login():
     finally:
         conn.close()
 
-    if session.get("reset_code"):
+    #password resetting
+    if session.get("reset_code") and email != "admin":
         if session.get("reset_code") != entered_code:
             return jsonify({"status": "incorrect reset code"}), 401
         conn = get_db()
