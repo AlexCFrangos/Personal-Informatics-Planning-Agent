@@ -50,7 +50,7 @@ The student is conducting a self-study using personal informatics (PI). The PI p
 WELCOME_MESSAGE = """
 Welcome, I am an AI agent that will help you to build a plan for your personal informatics project. I will walk you through several components of the planning process including posing hypotheses, identifying evidence from scientific literature, deciding on data variables and determining data collection methods.
     """
-spreadsheet_url = "https://docs.google.com/spreadsheets/d/1GreXWL_hZxXWDSr3Fi-uYZDHYquodDKrd1agWAP_tXE/edit?gid=0#gid=0"
+spreadsheet_url = os.environ.get("SHEET_URL")
 instructors = ['Chen', 'Zaidi', 'Rawal']
 
 #decorator for restricing access to pages/fuctions when not logged in
@@ -269,9 +269,8 @@ def login():
             conn.close()
         session["user"] = email
         session["user_id"] = id
-        session["reset_password"] = False
-        session["reset_code"] = ""
         session["role"] = "user"
+        session["reset_code"] = None
         return jsonify({"status": "success"})
     
     if row:
@@ -280,7 +279,6 @@ def login():
         
         session["user"] = email
         session["user_id"] = id
-        session["reset_password"] = False
 
         if email == "admin":
             session["role"] = "admin"
