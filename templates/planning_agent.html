@@ -231,6 +231,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         let lastDiv = null;
+        let waitingForResponse = false;
 
         let hypothesisInputList = [];
         let evidenceInputList = [];
@@ -398,14 +399,16 @@
         async function enterMessage() {
             const message = document.getElementById("userInput").value;
             const chatContainer = document.getElementById("chatContainer");
-            document.getElementById("inputForm").reset();
             
-            if (message === "") {
+            if (message === "" || waitingForResponse) {
                 return;
             }
+            
+            document.getElementById("inputForm").reset();
 
             updateHistory("user", message);
             updateHistory("assistant", "Loading...");
+            waitingForResponse = true;
 
             chatContainer.scrollTo({
                 top: chatContainer.scrollHeight,
@@ -422,6 +425,8 @@
             const data = await response.json();
 
             updateHistory("assistant", data.reply);
+
+            waitingForResponse = false;
         }
 
         function displayTables(display) {

@@ -645,20 +645,24 @@ def chat():
         database_update("N/A", reply, module, is_revision)
         
         return jsonify({"reply": reply})
-
-    response = client.responses.create(
-        model="openai.gpt-5.6-luna",
-        instructions=f"""
-                    You are an educational research assistant.
-                    \n Current module instructions: {BRAINSTORMING_PROMPT if module == 'brainstorming' else EVALUATION_PROMPT}
-                """,
-        input=f"{get_history()} + user message: {user_message}",
-        tools=[{"type": "web_search", "external_web_access": False}],
-        max_output_tokens=8192,
-        store=False,
-        reasoning={"effort": "medium"}
-    )
-    print(session.get("module"))
+    try:
+        response = client.responses.create(
+            model="openai.gpt-5.6-luna",
+            instructions=f"""
+                        You are an educational research assistant.
+                        \n Current module instructions: {BRAINSTORMING_PROMPT if module == 'brainstorming' else EVALUATION_PROMPT}
+                    """,
+            input=f"{get_history()} + user message: {user_message}",
+            tools=[{"type": "web_search", "external_web_access": False}],
+            max_output_tokens=8192,
+            store=False,
+            reasoning={"effort": "medium"}
+        )
+    except OpenAI.APIError:
+        reply = "Sorry, there seems to be an error responding. Try again later or contact support."
+        database_update(user_message, reply, module, is_revision)
+        return jsonify({"reply": reply})
+    
     reply = response.output_text
 
     database_update(user_message, reply, module, is_revision)
