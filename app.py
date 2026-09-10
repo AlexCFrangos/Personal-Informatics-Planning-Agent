@@ -624,20 +624,27 @@ def chat():
     data = request.get_json()
     user_message = data.get("message", "")
     is_revision = data.get("is_revision", False)
-    conn = get_db()
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT user_message, reply FROM chat_table WHERE user_id = %s AND revision = %s AND hide_from_user = %s",
-                            (session.get('user_id'), True, False))
-            row = cursor.fetchone()
-            if row:
-                session["module"] = "evaluation"
-            else:
-                session["module"] = "brainstorming"
-            session.modified = True
-    finally:
-        conn.close()
+
+    #ensure module is evaluation for first revision
+    if is_revision:
+        session["module"] = "evaluation"
+    else:
+        #edge case for when user logs out (no session data)
+        conn = get_db()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT user_message, reply FROM chat_table WHERE user_id = %s AND revision = %s AND hide_from_user = %s",
+                                (session.get('user_id'), True, False))
+                row = cursor.fetchone()
+                if row:
+                    session["module"] = "evaluation"
+                else:
+                    session["module"] = "brainstorming"
+        finally:
+            conn.close()
+
     module = session.get("module")
+    session.modified = True
 
     if user_message == "welcomemessage":
         reply = WELCOME_MESSAGE
@@ -783,7 +790,8 @@ def admin_update():
 
                         (SELECT CONVERT_TZ(MAX(c.timestamp), 'UTC', 'America/New_York')
                             FROM chat_table AS c
-                            WHERE c.user_id = u.user_id AND c.module = 'evaluation')
+                            WHERE c.user_id = u.user_id
+                                AND c.revision = 1)
                             AS latest_revision,
 
                         (SELECT COUNT(*) FROM variable_table AS v
@@ -799,7 +807,7 @@ def admin_update():
                         (SELECT COUNT(*) FROM variable_table AS v
                             WHERE v.user_id = u.user_id AND v.variable_type = 'Sleep') AS sleep_count,
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Excercise') AS excercise_count,
+                            WHERE v.user_id = u.user_id AND v.variable_type = 'Exercise') AS exercise_count,
                         (SELECT COUNT(*) FROM variable_table AS v
                             WHERE v.user_id = u.user_id AND v.variable_type = 'Food') AS food_count,
                         (SELECT COUNT(*) FROM variable_table AS v
@@ -831,7 +839,7 @@ def admin_update():
                 values = [[
                  'Student email', 'Number of brainstorming interactions', 'Number of evaluation interactions',
                  'Number of revisions', 'Latest revision', 'Number of variables', 'Number of hypotheses',
-                 'Sleep type number', 'Excercise type number', 'Food type number', 'Heath other type number',
+                 'Sleep type number', 'Exercise type number', 'Food type number', 'Heath other type number',
                  'SWB type number', 'Work type number', 'Digital type number', 'Study type number',
                  'Connections type number', 'Hobby/skills type number', 'Spiritual type number', 'Others type number'
                 ]]
@@ -850,7 +858,7 @@ def admin_update():
                         int(row["variable_count"]),
                         int(row["hypothesis_count"]),
                         int(row["sleep_count"]),
-                        int(row["excercise_count"]),
+                        int(row["exercise_count"]),
                         int(row["food_count"]),
                         int(row["health_others_count"]),
                         int(row["swb_count"]),
