@@ -766,7 +766,65 @@ def admin_update():
     action = data.get("action")
     email = data.get("email")
     conn = get_db()
+    if action == "get_plans":
 
+        try:
+            for instructor in instructors:
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                    SELECT
+                        u.email AS student_email,
+
+                        (SELECT c.user_message
+                            FROM chat_table AS c
+                            WHERE c.user_id = u.user_id
+                                AND c.revision = 1
+                            ORDER BY c.timestamp DESC
+                            LIMIT 1
+                        ) AS latest_revision,
+                        
+                        (SELECT CONVERT_TZ(MAX(c.timestamp), 'UTC', 'America/New_York')
+                            FROM chat_table AS c
+                            WHERE c.user_id = u.user_id
+                                AND c.revision = 1
+                        ) AS latest_revision_timestamp
+
+                        FROM user_table AS u
+                        WHERE u.class_section = %s
+                        ORDER BY u.email
+                    """, (instructor,))
+                    rows = cursor.fetchall()
+
+                #add headers
+                values = [[
+                 'Student email', 'Latest revision timestamp', 'Latest revision'
+                ]]
+
+                for row in rows:
+                    if row["latest_revision_timestamp"] is not None:
+                        row["latest_revision_timestamp"] = row["latest_revision_timestamp"].strftime("%m/%d/%y %H:%M:%S")
+
+                    #populate summary data
+                    values.append([
+                        row["student_email"],
+                        row["latest_revision_timestamp"],
+                        row["latest_revision"]
+                    ])
+
+                sheet_update("clear", spreadsheet_url, f"{instructor} - summary", [])
+
+                last_row = len(values)
+
+                sheet_update(
+                    "write",
+                    spreadsheet_url,
+                    f"{instructor} - plans!A1:Z{last_row}",
+                    values
+                )
+        finally:
+            conn.close()
+
+        return jsonify(success=True)
     if action == "get_summary":
 
         try:
@@ -792,7 +850,7 @@ def admin_update():
                             FROM chat_table AS c
                             WHERE c.user_id = u.user_id
                                 AND c.revision = 1)
-                            AS latest_revision,
+                            AS latest_revision_timestamp,
 
                         (SELECT COUNT(*) FROM variable_table AS v
                             WHERE v.user_id = u.user_id)
@@ -838,15 +896,15 @@ def admin_update():
                 #add headers
                 values = [[
                  'Student email', 'Number of brainstorming interactions', 'Number of evaluation interactions',
-                 'Number of revisions', 'Latest revision', 'Number of variables', 'Number of hypotheses',
+                 'Number of revisions', 'Latest revision timestamp', 'Number of variables', 'Number of hypotheses',
                  'Sleep type number', 'Exercise type number', 'Food type number', 'Heath other type number',
                  'SWB type number', 'Work type number', 'Digital type number', 'Study type number',
                  'Connections type number', 'Hobby/skills type number', 'Spiritual type number', 'Others type number'
                 ]]
 
                 for row in rows:
-                    if row["latest_revision"] is not None:
-                        row["latest_revision"] = row["latest_revision"].strftime("%m/%d/%y %H:%M:%S")
+                    if row["latest_revision_timestamp"] is not None:
+                        row["latest_revision_timestamp"] = row["latest_revision_timestamp"].strftime("%m/%d/%y %H:%M:%S")
 
                     #populate summary data
                     values.append([
@@ -854,7 +912,7 @@ def admin_update():
                         int(row["brainstorming_count"]),
                         int(row["evaluation_count"]),
                         int(row["revision_count"]),
-                        row["latest_revision"],
+                        row["latest_revision_timestamp"],
                         int(row["variable_count"]),
                         int(row["hypothesis_count"]),
                         int(row["sleep_count"]),
