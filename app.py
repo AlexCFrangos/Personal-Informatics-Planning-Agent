@@ -811,7 +811,7 @@ def admin_update():
                         row["latest_revision"]
                     ])
 
-                sheet_update("clear", spreadsheet_url, f"{instructor} - summary", [])
+                sheet_update("clear", spreadsheet_url, f"{instructor} - plans", [])
 
                 last_row = len(values)
 
