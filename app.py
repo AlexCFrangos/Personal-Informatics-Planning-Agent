@@ -7,6 +7,7 @@ import smtplib
 import string
 from email.message import EmailMessage
 from functools import wraps
+from zoneinfo import ZoneInfo
 
 import pymysql
 from flask import (
@@ -430,7 +431,7 @@ def verify_email():
 def download_data():
     data = request.get_json()
     username = session.get("user")
-    timestamp = datetime.datetime.now().strftime("%m/%d/%y %H:%M:%S")  # noqa: DTZ005
+    timestamp = datetime.datetime.now(ZoneInfo("America/New_York")).strftime("%m/%d/%y %H:%M:%S")
 
     hypothesis = data.get("hypothesis", "")
     evidence = data.get("evidence", "")
