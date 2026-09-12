@@ -811,8 +811,8 @@
             
             sessionStorage.setItem("loadTable", "true");
 
-            chatContainer.scrollTo({
-                top: chatContainer.scrollHeight,
+            document.getElementById("chatContainer").scrollTo({
+                top: document.getElementById("chatContainer").scrollHeight,
                 behavior: "smooth"
             });
 
@@ -858,9 +858,9 @@
                 method: "GET",
                 headers: {"Content-Type": "application/json"},
             });
-            window.location.reload();
 
             sessionStorage.setItem("loadTable", "false");
+            window.location.reload();
         }
         
         function help(action) {

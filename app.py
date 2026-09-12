@@ -853,39 +853,144 @@ def admin_update():
                             AS latest_revision_timestamp,
 
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id)
-                            AS "variable_count",
+                            WHERE v.user_id = u.user_id
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                            ) AS "variable_count",
 
                         (SELECT COUNT(*) FROM hypothesis_table AS h
-                            WHERE h.user_id = u.user_id)
-                            AS "hypothesis_count",
+                            WHERE h.user_id = u.user_id
+                                AND h.submission_id = (
+                                    SELECT MAX(h2.submission_id)
+                                    FROM hypothesis_table AS h2
+                                    WHERE h2.user_id = u.user_id
+                                    )
+                            ) AS "hypothesis_count",
 
                         
 
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Sleep') AS sleep_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Sleep'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS sleep_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Exercise') AS exercise_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Exercise'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS exercise_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Food') AS food_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Food'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS food_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Health-others') AS health_others_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Health-others'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS health_others_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'SWB') AS swb_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'SWB'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS swb_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Work') AS work_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Work'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS work_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Digital') AS digital_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Digital'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS digital_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Study') AS study_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Study'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS study_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Connections') AS connection_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Connections'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS connection_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Hobby/Skills') AS hobby_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Hobby/Skills'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                            ) AS hobby_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Spiritual') AS spiritual_count,
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Spiritual'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS spiritual_count,
+
                         (SELECT COUNT(*) FROM variable_table AS v
-                            WHERE v.user_id = u.user_id AND v.variable_type = 'Others') AS others_count
+                            WHERE v.user_id = u.user_id
+                                AND v.variable_type = 'Others'
+                                AND v.submission_id = (
+                                    SELECT MAX(v2.submission_id)
+                                    FROM variable_table AS v2
+                                    WHERE v2.user_id = u.user_id
+                                    )
+                                ) AS others_count
 
                         FROM user_table AS u
                         WHERE u.class_section = %s
