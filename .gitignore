@@ -1,4 +1,4 @@
 credentials.json
-PIPA.code-workspace
+*.code-workspace
 .vscode
 .venv/
